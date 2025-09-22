@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple GLB Viewer</title>
+
+  <!-- model-viewer web component (module). Uses a small, well supported library for 3D models. -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    /* make the page fill the window and center the viewer */
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: #111; /* dark background to show model clearly */
+      color: #ddd;
+    }
+
+    .container {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    model-viewer {
+      width: 100%;
+      max-width: 1400px;
+      height: 80vh;
+      background: linear-gradient(180deg, #222, #0f0f10);
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .controls {
+      width: 100%;
+      max-width: 1400px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .controls button {
+      background: #1f1f1f;
+      color: #eee;
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .controls button:active { transform: translateY(1px); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- model-viewer element -->
+    <div style="width:100%">
+      <!--
+        Replace the value of src with your file path if it is located elsewhere.
+        The src below matches exactly the filename you provided.
+      -->
+      <model-viewer id="mv"
+                    src="uploads_files_2870701_City+map5.glb"
+                    alt="City map model"
+                    exposure="1"
+                    shadow-intensity="1"
+                    auto-rotate
+                    camera-controls
+                    interaction-prompt="auto"
+                    poster=""
+                    ar
+                    style="outline: none;">
+        <!-- Fallback content for old browsers -->
+        <div>
+          Your browser does not support the model viewer component. Try a modern version of Chrome, Edge, Firefox or Safari.
+        </div>
+      </model-viewer>
+
+      <div class="controls" aria-hidden="false">
+        <div>
+          <button id="toggle-rotate">Stop Auto Rotate</button>
+          <button id="reset-camera">Reset Camera</button>
+        </div>
+        <div>
+          <label style="font-size:14px; opacity:0.85; margin-right:8px;">Field of View</label>
+          <input id="fov" type="range" min="20" max="90" value="45" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const mv = document.getElementById('mv');
+    const btnRotate = document.getElementById('toggle-rotate');
+    const btnReset = document.getElementById('reset-camera');
+    const fovRange = document.getElementById('fov');
+
+    // toggle auto-rotate on and off
+    let rotating = true;
+    btnRotate.addEventListener('click', () => {
+      rotating = !rotating;
+      mv.autoRotate = rotating;
+      btnRotate.textContent = rotating ? 'Stop Auto Rotate' : 'Start Auto Rotate';
+    });
+
+    // reset the camera to default view
+    btnReset.addEventListener('click', () => {
+      mv.cameraOrbit = '0deg 75deg 2.5m';
+      // request an update of camera
+      mv.jumpCameraToGoal();
+    });
+
+    // map slider value to camera field-of-view
+    fovRange.addEventListener('input', (e) => {
+      // model-viewer uses the attribute "field-of-view" in degrees
+      const deg = e.target.value;
+      mv.setAttribute('field-of-view', deg + 'deg');
+    });
+
+    // when model loads, set a comfortable initial camera orbit and field of view
+    mv.addEventListener('load', () => {
+      // choose an initial camera orbit and radius that works for many models
+      // these values will be used if model does not override camera defaults
+      mv.cameraOrbit = '0deg 75deg 2.5m';
+      mv.setAttribute('field-of-view', '45deg');
+    });
+  </script>
+</body>
+</html>
